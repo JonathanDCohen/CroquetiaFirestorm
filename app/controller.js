@@ -95,7 +95,7 @@ module.exports = class PixelblazeController {
     console.log("connected to " + this.props.address);
     this.lastSeen = new Date().getTime();
     clearTimeout(this.reconectTimeout);
-    this.sendFrame({getConfig: true, listPrograms: true, sendUpdates: false, ...this.command});
+    this.sendFrame({getConfig: true, listPrograms: true, sendUpdates: false, sequencerMode: 0, ...this.command});
   }
 
   handleClose() {
