@@ -18,6 +18,81 @@ async function asyncRetryHelper(fn, retries, initialWait, errorWait) {
   throw err
 }
 
+function addWicketMetadataToCommand(command, wicketName) {
+  /**
+   * `.loc` and `.startingPixel` refer to the position in a virtual 1D strip, with each wicket counting as the first
+   * time it's visited.  .playOrderLocs are the actual, 0-based order the wickets are visited in a full game.
+   */
+  const metadataMap = {
+    'Croquetia1': {
+      loc: 0,
+      startingPixel: 0,
+      playOrderLocs: [0, 15],
+    },
+    'Croquetia3': {
+      loc: 1,
+      startingPixel: 18,
+      playOrderLocs: [1, 14],
+    },
+    'Croquetia4': {
+      loc: 2,
+      startingPixel: 56,
+      playOrderLocs: [2, 13],
+    },
+    'Croquetia5': {
+      loc: 3,
+      startingPixel: 94,
+      playOrderLocs: [3],
+    },
+    'Croquetia6': {
+      loc: 4,
+      startingPixel: 132,
+      playOrderLocs: [4, 12],
+    },
+    'Croquetia7': {
+      loc: 5,
+      startingPixel: 170,
+      playOrderLocs: [5],
+    },
+    'Croquetia8': {
+      loc: 6,
+      startingPixel: 208,
+      playOrderLocs: [6, 10],
+    },
+    'Croquetia9': {
+      loc: 7,
+      startingPixel: 246,
+      playOrderLocs: [7, 9],
+    },
+    'Croquetia2': {
+      loc: 8,
+      startingPixel: 284,
+      playOrderLocs: [8],
+    },
+    'Croquetia10': {
+      loc: 9,
+      startingPixel: 302,
+      playOrderLocs: [11],
+    },
+    'Croquetia11': {
+      loc: 10,
+      startingPixel: 340,
+      playOrderLocs: [13],
+    },
+  }
+  // Tell each wicket which one it is for virtual linear and play-order based patterns.
+  const wicketMetadata = metadataMap[wicketName];
+  if (!wicketMetadata) {
+    console.error(`No wicketMetadata found for id ${wicketName}`);
+  }
+  command.setVars = {
+    'myLoc': wicketMetadata.loc,
+    'myStartingPixel': wicketMetadata.startingPixel,
+    'myPlayOrderLocs': wicketMetadata.playOrderLocs
+  }
+  console.debug(`Modified command: ${JSON.stringify(command)}`);
+}
+
 module.exports = function (app) {
 
   app.get("/discover", function (req, res) {
@@ -30,11 +105,15 @@ module.exports = function (app) {
 
   app.post("/command", function (req, res) {
     if (req.body && req.body.ids && req.body.command) {
+      let command = req.body.command;
       _.each(req.body.ids, id => {
         id = String(id);
         let controller = discoveries[id] && discoveries[id].controller;
         if (controller) {
-          controller.setCommand(req.body.command);
+          if (Object.keys(command).includes('programName')) {
+            addWicketMetadataToCommand(command, discoveries[id].controller.props.name);
+          }
+          controller.setCommand(command);
         }
       })
       res.send("ok");
@@ -51,9 +130,13 @@ module.exports = function (app) {
         let ids = req.query.ids.split(',');
         _.each(ids, id => {
           let controller = discoveries[id] && discoveries[id].controller;
-          if (controller) {
-            controller.setCommand(command);
+          if (!controller) {
+            return;
           }
+          if (Object.keys(command).includes('programName')) {
+            addWicketMetadataToCommand(command, discoveries[id].name);
+          }
+          controller.setCommand(command);
         })
         res.send("ok");
       } catch (err) {

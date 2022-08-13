@@ -176,8 +176,10 @@ module.exports = class PixelblazeController {
 
     //see if those keys values are different
     let keys = _.keys(command);
-    if (_.isEqual(_.pick(command, keys), _.pick(this.command, keys)))
+    if (_.isEqual(_.pick(command, keys), _.pick(this.command, keys))) {
       return;
+    }
+
     _.assign(this.command, command);
     this.sendFrame(command);
   }

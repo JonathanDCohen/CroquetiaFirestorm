@@ -40,7 +40,6 @@ module.exports.start = function (options) {
   });
 
   server.on('message', function (message, remote) {
-    console.log('message');
     if (message.length < 12)
       return;
 
@@ -55,7 +54,7 @@ module.exports.start = function (options) {
 
     switch (header.packetType) {
       case PacketTypes.BEACONPACKET:
-        console.log("BEACONPACKET from " + remote.address + ':' + remote.port + " id: " + header.senderId + " senderTime: " + header.senderTime + " delta: " + (now32 - header.senderTime));
+        // console.log("BEACONPACKET from " + remote.address + ':' + remote.port + " id: " + header.senderId + " senderTime: " + header.senderTime + " delta: " + (now32 - header.senderTime));
 
         //record this discovery and fire up a controller
         let record = discoveries[header.senderId] = discoveries[header.senderId] || {};
@@ -80,9 +79,9 @@ module.exports.start = function (options) {
         sync.writeUInt32LE(header.senderId, 12);
         sync.writeUInt32LE(header.senderTime, 16);
 
-        console.log(`sending sync packet: ${sync}`)
+        // console.log(`sending sync packet: ${sync}`)
         server.send(sync, 0, sync.length, remote.port, remote.address, (err, res) => {
-          console.log(err, res);
+          // console.log(err, res);
         });
         break;
       case PacketTypes.TIMESYNC:
