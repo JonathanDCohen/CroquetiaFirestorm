@@ -18,7 +18,14 @@ async function asyncRetryHelper(fn, retries, initialWait, errorWait) {
   throw err
 }
 
+/**
+ * 
+ * @param {string} command 
+ * @param {string} wicketName 
+ */
 function addWicketMetadataToCommand(command, wicketName) {
+  // Skip backup wicket and bar wicket
+  if(!wicketName.match(/Croquetia\d\d?/)) { return; }
   /**
    * `.loc` and `.startingPixel` refer to the position in a virtual 1D strip, with each wicket counting as the first
    * time it's visited.  .playOrderLocs are the actual, 0-based order the wickets are visited in a full game.
@@ -27,17 +34,17 @@ function addWicketMetadataToCommand(command, wicketName) {
     'Croquetia1': {
       loc: 0,
       startingPixel: 0,
-      playOrderLocs: [0, 15],
+      playOrderLocs: [0, 16],
     },
     'Croquetia3': {
       loc: 1,
       startingPixel: 18,
-      playOrderLocs: [1, 14],
+      playOrderLocs: [1, 15],
     },
     'Croquetia4': {
       loc: 2,
       startingPixel: 56,
-      playOrderLocs: [2, 13],
+      playOrderLocs: [2, 14],
     },
     'Croquetia5': {
       loc: 3,
@@ -90,7 +97,7 @@ function addWicketMetadataToCommand(command, wicketName) {
     'myStartingPixel': wicketMetadata.startingPixel,
     'myPlayOrderLocs': wicketMetadata.playOrderLocs
   }
-  console.debug(`Modified command: ${JSON.stringify(command)}`);
+  console.debug(`Modified command for ${wicketName}: ${JSON.stringify(command)}`);
 }
 
 module.exports = function (app) {
